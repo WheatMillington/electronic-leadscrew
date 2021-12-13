@@ -28,7 +28,7 @@
 #define __CONTROL_PANEL_2_H
 
 #include "F28x_Project.h"
-#include "SPIBus2.h"
+#include "SPIBus_2.h"
 
 
 #define ZERO    0b1111110000000000 // 0
