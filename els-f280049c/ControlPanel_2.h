@@ -83,7 +83,7 @@
 #define LED_7 (1<<6)
 #define LED_8 (1<<7)
 
-struct LED_BITS_2
+struct LED_BITS
 {
     Uint16 BIT1:1;
     Uint16 BIT2:1;
@@ -95,13 +95,13 @@ struct LED_BITS_2
     Uint16 BIT8:1;
 };
 
-typedef union LED_REG_2
+typedef union LED_REG
 {
     Uint16 all;
-    struct LED_BITS_2 bit;
-} LED_REG_2;
+    struct LED_BITS bit;
+} LED_REG;
 
-struct KEY_BITS_2
+struct KEY_BITS
 {
     Uint16 ZERO:1;
     Uint16 KEY2:1;
@@ -113,11 +113,11 @@ struct KEY_BITS_2
     Uint16 KEY8:1;
 };
 
-typedef union KEY_REG_2
+typedef union KEY_REG
 {
     Uint16 all;
-    struct KEY_BITS_2 bit;
-} KEY_REG_2;
+    struct KEY_BITS bit;
+} KEY_REG;
 
 
 class ControlPanel_2
