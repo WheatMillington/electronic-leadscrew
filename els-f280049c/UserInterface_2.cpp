@@ -46,11 +46,6 @@ UserInterface_2 :: UserInterface_2(ControlPanel_2 *controlPanel, Core *core)
     this->controlPanel = controlPanel;
     this->core = core;
 
-    this->metric = true; // start out with metric
-    this->thread = false; // start out with feeds
-    this->reverse = false; // start out going forward
-    this->sposition = false; // start out showing RPM
-
     this->keys.all = 0xff;
 
     setMessage(&STARTUP_MESSAGE_1);
@@ -116,9 +111,9 @@ void UserInterface_2 :: loop( void )
 
     // respond to keypresses
     // respond regardless of machine state
-//    if( keys.bit.[enter key here] ) {
-//
-//    }
+    if( keys.bit.ZERO ) {
+// how to reset sposition to zero? need function in encoder?
+    }
 
     if( currentRpm == 0 )
     {
