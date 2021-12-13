@@ -29,6 +29,7 @@
 
 #include "F28x_Project.h"
 #include "SPIBus_2.h"
+#include "Encoder.h"
 
 
 #define ZERO    0b1111110000000000 // 0
@@ -124,6 +125,8 @@ class ControlPanel_2
 private:
     // Common SPI Bus
     SPIBus *spiBus;
+    
+    Encoder *encoder;
 
     // Current RPM value; 4 decimal digits
     Uint16 rpm;
