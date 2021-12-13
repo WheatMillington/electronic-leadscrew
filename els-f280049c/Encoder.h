@@ -58,6 +58,7 @@ public:
     Uint16 getSPosition(void);
     Uint32 getPosition( void );
     Uint32 getMaxCount( void );
+    void ZeroPosition(void);
 };
 
 
