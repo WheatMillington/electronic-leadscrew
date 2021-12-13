@@ -102,7 +102,7 @@ typedef union LED_REG_2
 
 struct KEY_BITS_2
 {
-    Uint16 Zero:1;
+    Uint16 ZERO:1;
     Uint16 KEY2:1;
     Uint16 KEY3:1;
     Uint16 KEY4:1;
