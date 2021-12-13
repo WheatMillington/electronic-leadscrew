@@ -112,7 +112,7 @@ void UserInterface_2 :: loop( void )
     // respond to keypresses
     // respond regardless of machine state
     if( keys.bit.ZERO ) {
-// how to reset sposition to zero? need function in encoder?
+      encoder->ZeroPosition();
     }
 
     if( currentRpm == 0 )
