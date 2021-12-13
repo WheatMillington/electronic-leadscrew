@@ -41,7 +41,7 @@ typedef struct MESSAGE
 class UserInterface_2
 {
 private:
-    ControlPanel *controlPanel;
+    ControlPanel_2 *controlPanel;
     Core *core;
     Encoder *encoder;
 
