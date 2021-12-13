@@ -161,3 +161,8 @@ Uint16 Encoder :: getSPosition(void)
 
     return sposition;
 }
+
+void Encoder :: ZeroPosition(void)
+{
+    pcount = 0;
+}
