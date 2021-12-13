@@ -41,18 +41,15 @@ const MESSAGE STARTUP_MESSAGE_1 =
 
 const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
 
-UserInterface_2 :: UserInterface_2(ControlPanel_2 *controlPanel, Core *core, FeedTableFactory *feedTableFactory)
+UserInterface_2 :: UserInterface_2(ControlPanel_2 *controlPanel, Core *core)
 {
     this->controlPanel = controlPanel;
     this->core = core;
-    this->feedTableFactory = feedTableFactory;
 
     this->metric = true; // start out with metric
     this->thread = false; // start out with feeds
     this->reverse = false; // start out going forward
     this->sposition = false; // start out showing RPM
-
-    this->feedTable = NULL;
 
     this->keys.all = 0xff;
 
