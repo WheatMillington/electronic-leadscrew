@@ -44,9 +44,6 @@ class Encoder
 {
 private:
     Uint32 previous;
-    Uint32 pcount;
-    Uint32 pprevious;
-    Uint32 pcurrent;
     Uint16 rpm;
     Uint32 sposition;
 
@@ -58,7 +55,7 @@ public:
     Uint16 getSPosition(void);
     Uint32 getPosition( void );
     Uint32 getMaxCount( void );
-    void ZeroPosition(void);
+    void ZeroPosition( void );
 };
 
 
