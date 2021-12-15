@@ -37,7 +37,7 @@
 #define ENCODER_REGS EQep2Regs
 #endif
 
-#define _ENCODER_MAX_COUNT 0x00ffffff
+#define _ENCODER_MAX_COUNT 0x7E7000
 
 
 class Encoder
