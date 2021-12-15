@@ -31,9 +31,7 @@
 Encoder :: Encoder( void )
 {
     this->previous = 0;
-    this->pprevious = 0;
     this->rpm = 0;
-    this->sposition = 0;
 }
 
 void Encoder :: initHardware(void)
@@ -84,7 +82,7 @@ void Encoder :: initHardware(void)
     ENCODER_REGS.QEPCTL.bit.PCRM = 1;          // position count reset on maximum position
     ENCODER_REGS.QPOSMAX = _ENCODER_MAX_COUNT;  // Max position count
     ENCODER_REGS.QEPCTL.bit.SWI = 1;            // Allow writing to QPOSCNT for initialization
-    ENCODER_REGS.QPOSINIT = _ENCODER_MAX_COUNT / 2; // Initialize QPOSCNT at a high value to avoid problems with under/overflow
+    ENCODER_REGS.QPOSINIT = ENCODER_RESOLUTION; // Initialize QPOSCNT at a high value to avoid problems with under/overflow
 
 
     ENCODER_REGS.QUPRD = CPU_CLOCK_HZ / RPM_CALC_RATE_HZ; // Unit Timer latch at RPM_CALC_RATE_HZ Hz
