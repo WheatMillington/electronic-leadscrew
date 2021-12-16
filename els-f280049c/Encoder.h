@@ -37,8 +37,8 @@
 #define ENCODER_REGS EQep2Regs
 #endif
 
-// define _ENCODER_MAX_COUNT as a multiple of ENCODER_RESOLUTION so that the modulo function in getSPosition() overflows correctly (8,092 * 1,024)
-#define _ENCODER_MAX_COUNT 0x7E7000
+// define _ENCODER_MAX_COUNT as a multiple of ENCODER_RESOLUTION so that the modulo function in getSPosition() overflows correctly
+#define _ENCODER_MAX_COUNT (ENCODER_RESOLUTION * 512)
 
 
 class Encoder
