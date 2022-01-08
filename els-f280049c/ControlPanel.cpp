@@ -37,10 +37,13 @@
 
 
 // Lower the TM1638 CS (STB) line
-#define CS_ASSERT GpioDataRegs.GPBCLEAR.bit.GPIO33 = 1
+#define CS_ASSERT GpioDataRegs.GPBCLEAR.bit.GPIO33 = 1 // Display 1
+#define CS_ASSERT_2 GpioDataRegs.GPBCLEAR.bit.GPIO57 = 1 // Display 2
+
 
 // Raise the TM1638 CS (STB) line
-#define CS_RELEASE GpioDataRegs.GPBSET.bit.GPIO33 = 1
+#define CS_RELEASE GpioDataRegs.GPBSET.bit.GPIO33 = 1 // Display 1
+#define CS_RELEASE_2 GpioDataRegs.GPBSET.bit.GPIO57 = 1 // Display 2
 
 
 ControlPanel :: ControlPanel(SPIBus *spiBus)
@@ -61,10 +64,15 @@ void ControlPanel :: initHardware(void)
 {
     EALLOW;
 
-    // use GPIO33 as the chip select so we can control it ourselves
+    // Display 1 - use GPIO33 as the chip select so we can control it ourselves
     GpioCtrlRegs.GPBMUX1.bit.GPIO33 = 0x0;      // SELECT GPIO33
     GpioCtrlRegs.GPBDIR.bit.GPIO33 = 1;         // output
     CS_RELEASE;                                 // set it to high
+
+    // Display 2 - use GPIO39 as the chip select so we can control it ourselves
+    GpioCtrlRegs.GPBMUX2.bit.GPIO57 = 0x0;      // SELECT GPIO39
+    GpioCtrlRegs.GPBDIR.bit.GPIO57 = 1;         // output
+    CS_RELEASE_2;                                 // set it to high
 
     EDIS;
 }
@@ -155,10 +163,12 @@ void ControlPanel :: sendData()
         briteVal = 0x87 + this->brightness;
     }
 
-    SpibRegs.SPICTL.bit.TALK = 1;
+    // Display 1:
+
+    SpibRegs.SPICTL.bit.TALK = 1; // Display 1
 
     CS_ASSERT;
-    spiBus->sendWord(reverse_byte(briteVal));       // brightness
+    spiBus->sendWord(reverse_byte(briteVal));       // brightness Display 1
     CS_RELEASE;
     DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
 
@@ -185,6 +195,39 @@ void ControlPanel :: sendData()
     DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
 
     SpibRegs.SPICTL.bit.TALK = 0;
+
+    // Display 2:
+
+    SpiaRegs.SPICTL.bit.TALK = 1; // Display 2
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(briteVal));       // brightness Display 2
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0x40));           // auto-increment
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0xc0));           // display data
+    for( i=0; i < 8; i++ ) {
+        if( this->message != NULL )
+        {
+            spiBus->sendWord_2(this->message[i]);
+        }
+        else
+        {
+            spiBus->sendWord_2(this->sevenSegmentData[i]);
+        }
+        spiBus->sendWord_2( (ledMask & 0x80) ? 0xff00 : 0x0000 );
+        ledMask <<= 1;
+    }
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    SpiaRegs.SPICTL.bit.TALK = 0; // Display 2
 }
 
 void ControlPanel :: decomposeRPM()

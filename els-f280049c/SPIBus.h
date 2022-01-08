@@ -34,6 +34,7 @@ class SPIBus
 private:
     // dummy register, for SPI
     Uint16 dummy;
+    Uint16 dummy_2;
 
     // mask used to discard high bits on receive
     Uint16 mask;
@@ -50,10 +51,12 @@ public:
     void setSixteenBits( void );
 
     // transmit one word of data
-    void sendWord(Uint16 data);
+    void sendWord(Uint16 data); // Display 1
+    void sendWord_2(Uint16 data); // Display 2
 
     // receive one word of data
-    Uint16 receiveWord(void);
+    Uint16 receiveWord(void); // Display 1
+    Uint16 receiveWord_2(void); // Display 2
 
 };
 
