@@ -24,199 +24,35 @@
 // SOFTWARE.
 
 
-#ifndef __STEPPERDRIVE_H
-#define __STEPPERDRIVE_H
-
-#include "F28x_Project.h"
 #include "Configuration.h"
+#include "StepperDrive.h"
 
-
-#define STEP_PIN GPIO0
-#define DIRECTION_PIN GPIO1
-#define ENABLE_PIN GPIO6
-#define ALARM_PIN GPIO7
-
-#define GPIO_SET(pin) GpioDataRegs.GPASET.bit.pin = 1
-#define GPIO_CLEAR(pin) GpioDataRegs.GPACLEAR.bit.pin = 1
-#define GPIO_GET(pin) GpioDataRegs.GPADAT.bit.pin
-
-#ifdef INVERT_STEP_PIN
-#define GPIO_SET_STEP GPIO_CLEAR(STEP_PIN)
-#define GPIO_CLEAR_STEP GPIO_SET(STEP_PIN)
-#else
-#define GPIO_SET_STEP GPIO_SET(STEP_PIN)
-#define GPIO_CLEAR_STEP GPIO_CLEAR(STEP_PIN)
-#endif
-
-#ifdef INVERT_DIRECTION_PIN
-#define GPIO_SET_DIRECTION GPIO_CLEAR(DIRECTION_PIN)
-#define GPIO_CLEAR_DIRECTION GPIO_SET(DIRECTION_PIN)
-#else
-#define GPIO_SET_DIRECTION GPIO_SET(DIRECTION_PIN)
-#define GPIO_CLEAR_DIRECTION GPIO_CLEAR(DIRECTION_PIN)
-#endif
-
-#ifdef INVERT_ENABLE_PIN
-#define GPIO_SET_ENABLE GPIO_CLEAR(ENABLE_PIN)
-#define GPIO_CLEAR_ENABLE GPIO_SET(ENABLE_PIN)
-#else
-#define GPIO_SET_ENABLE GPIO_SET(ENABLE_PIN)
-#define GPIO_CLEAR_ENABLE GPIO_CLEAR(ENABLE_PIN)
-#endif
-
-#ifdef INVERT_ALARM_PIN
-#define GPIO_GET_ALARM (GPIO_GET(ALARM_PIN) == 0)
-#else
-#define GPIO_GET_ALARM (GPIO_GET(ALARM_PIN) != 0)
-#endif
-
-
-class StepperDrive
+class Carriage
 {
-private:
-    //
-    // Current position of the motor, in steps
-    //
-    int32 currentPosition;
-
-    //
-    // current state-machine state
-    // bit 0 - step signal
-    // bit 1 - direction signal
-    //
-    Uint16 state;
-
-    //
-    // Is the drive enabled?
-    //
-    bool enabled;
+private: 
+    StepperDrive *stepperDrive;
     
-    //
-    // Set the carriage position
-    //
     int32 carriagePosition;
+    int32 carriageOffset;
 
 public:
-    StepperDrive();
-    void initHardware(void);
-
-    void setDesiredPosition(int32 steps);
-    void incrementCurrentPosition(int32 increment);
-    void setCurrentPosition(int32 position);
-
-    bool checkStepBacklog();
-
-    void setEnabled(bool);
-
-    bool isAlarm();
-
-    void ISR(void);
-
+    int32 getCarriagePosition(void);
+    void zeroCarriagePosition(void);
+    
 };
 
-inline void StepperDrive :: setDesiredPosition(int32 steps)
-{
-    this->desiredPosition = steps;
-}
-
-inline void StepperDrive :: incrementCurrentPosition(int32 increment)
-{
-    this->currentPosition += increment;
-}
-
-inline void StepperDrive :: setCurrentPosition(int32 position)
-{
-    this->currentPosition = position;
-}
-
-inline bool StepperDrive :: checkStepBacklog()
-{
-    if( abs(this->desiredPosition - this->currentPosition) > MAX_BUFFERED_STEPS ) {
-        setEnabled(false);
-        return true;
-    }
-    return false;
-}
-
-inline void StepperDrive :: setEnabled(bool enabled)
-{
-    this->enabled = enabled;
-    if( this->enabled ) {
-        GPIO_SET_ENABLE;
-    }
-    else
-    {
-        GPIO_CLEAR_ENABLE;
-    }
-}
-
-inline bool StepperDrive :: isAlarm()
-{
-#ifdef USE_ALARM_PIN
-    return GPIO_GET_ALARM;
-#else
-    return false;
-#endif
-}
-
-
-inline void StepperDrive :: ISR(void)
-{
-    if(enabled) {
-
-        switch( this->state ) {
-
-        case 0:
-            // Step = 0; Dir = 0
-            if( this->desiredPosition < this->currentPosition ) {
-                GPIO_SET_STEP;
-                this->state = 2;
-            }
-            else if( this->desiredPosition > this->currentPosition ) {
-                GPIO_SET_DIRECTION;
-                this->state = 1;
-            }
-            break;
-
-        case 1:
-            // Step = 0; Dir = 1
-            if( this->desiredPosition > this->currentPosition ) {
-                GPIO_SET_STEP;
-                this->state = 3;
-            }
-            else if( this->desiredPosition < this->currentPosition ) {
-                GPIO_CLEAR_DIRECTION;
-                this->state = 0;
-            }
-            break;
-
-        case 2:
-            // Step = 1; Dir = 0
-            GPIO_CLEAR_STEP;
-            this->currentPosition--;
-            this->state = 0;
-            break;
-
-        case 3:
-            // Step = 1; Dir = 1
-            GPIO_CLEAR_STEP;
-            this->currentPosition++;
-            this->state = 1;
-            break;
-        }
-
-    } else {
-        // not enabled; just keep current position in sync
-        this->currentPosition = this->desiredPosition;
-    }
-}
-
-int32 StepperDrive :: getCarriagePosition(void)
+int32 Carriage :: getCarriagePosition(void)
 {
     // Carriage position in hundreths of a mm
-    this->carriagePosition = ( (float) currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM
+    this->carriagePosition = (( (float) stepperDrive->currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM) + carriageOffset
         
     return carriagePosition;
+}
+
+void zeroCarriagePosition(void)
+{
+    // use an offset value to zero carriage position = will allow additional functionality in future
+    carriageOffset = -carriagePosition;
 }
 
 #endif // __STEPPERDRIVE_H
