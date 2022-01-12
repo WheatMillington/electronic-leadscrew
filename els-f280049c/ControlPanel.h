@@ -130,6 +130,9 @@ private:
 
     // Current spindle position value
     Uint16 sposition;
+    
+    // Current carriage position value
+    Int32 carriageposition;
 
     // Current displayed setting value, 4 digits
     const Uint16 *value;
@@ -162,6 +165,7 @@ private:
     void decomposeRPM(void);
     void decomposeSPosition(void);
     void decomposeValue(void);
+    void decomposeCarriagePosition(void);
     KEY_REG readKeys(void);
     Uint16 lcd_char(Uint16 x);
     void sendByte(Uint16 data);
@@ -190,6 +194,9 @@ public:
 
     // set the value to display
     void setValue(const Uint16 *value);
+    
+    // set the carriage position to display
+    void setCarriagePosition(int32 carriageposition)
 
     // set the LED states
     void setLEDs(LED_REG leds);
@@ -213,6 +220,11 @@ inline void ControlPanel :: setRPM(Uint16 rpm)
 inline void ControlPanel :: setSPosition(Uint16 sposition)
 {
     this->sposition = sposition;
+}
+
+inline void ControlPanel :: setCarriagePosition(int32 carriageposition)
+{
+    this->carriageposition = carriageposition;
 }
 
 inline void ControlPanel :: setValue(const Uint16 *value)
