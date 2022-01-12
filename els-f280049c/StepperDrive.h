@@ -95,6 +95,11 @@ private:
     // Is the drive enabled?
     //
     bool enabled;
+    
+    //
+    // Set the carriage position
+    //
+    int32 carriagePosition;
 
 public:
     StepperDrive();
@@ -111,6 +116,8 @@ public:
     bool isAlarm();
 
     void ISR(void);
+    
+    void getCarriagePosition();
 };
 
 inline void StepperDrive :: setDesiredPosition(int32 steps)
@@ -208,6 +215,12 @@ inline void StepperDrive :: ISR(void)
         // not enabled; just keep current position in sync
         this->currentPosition = this->desiredPosition;
     }
+}
+
+inline void StepperDrive :: getCarriagePosition()
+{
+    // Carriage position in hundreths of a mm
+    this->carriagePosition = ( (float) currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM
 }
 
 #endif // __STEPPERDRIVE_H
