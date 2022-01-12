@@ -40,6 +40,15 @@ private:
 public:
     int32 getCarriagePosition(void);
     void zeroCarriagePosition(void);
+    void setLeftStop(void);
+    void setRightStop(void);
+    
+    bool carriageLeftStopActive;
+    bool carriageRightStopActive;
+    
+    int32 carriageLeftStop;
+    int32 carriageRightStop;
+    
     
 };
 
