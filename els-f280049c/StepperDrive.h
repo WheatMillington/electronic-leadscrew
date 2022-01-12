@@ -80,11 +80,6 @@ private:
     int32 currentPosition;
 
     //
-    // Desired position of the motor, in steps
-    //
-    int32 desiredPosition;
-
-    //
     // current state-machine state
     // bit 0 - step signal
     // bit 1 - direction signal
@@ -116,8 +111,7 @@ public:
     bool isAlarm();
 
     void ISR(void);
-    
-    void getCarriagePosition();
+
 };
 
 inline void StepperDrive :: setDesiredPosition(int32 steps)
@@ -217,10 +211,12 @@ inline void StepperDrive :: ISR(void)
     }
 }
 
-inline void StepperDrive :: getCarriagePosition()
+int32 StepperDrive :: getCarriagePosition(void)
 {
     // Carriage position in hundreths of a mm
     this->carriagePosition = ( (float) currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM
+        
+    return carriagePosition;
 }
 
 #endif // __STEPPERDRIVE_H
