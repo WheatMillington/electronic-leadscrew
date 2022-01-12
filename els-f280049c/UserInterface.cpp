@@ -161,6 +161,9 @@ void UserInterface :: loop( void )
 
     // read the current spindle position to keep this up to date
     Uint16 currentSPosition = encoder->getSPosition();
+  
+    // read the current carriage position to keep this up to date
+    Int32 carriagePosition = core->getCarriagePosition();
 
     // display an override message, if there is one
     overrideMessage();
