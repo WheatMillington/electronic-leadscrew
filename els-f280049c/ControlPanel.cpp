@@ -256,6 +256,17 @@ void ControlPanel :: decomposeSPosition()
     }
 }
 
+void ControlPanel :: decomposeCarriagePosition()
+{
+    int32 carriageposition = this->carriageposition;
+    int i;
+
+    for(i=3; i>=0; i--) {
+        this->sevenSegmentData[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
+        carriageposition = carriageposition / 10;
+    }
+}
+
 void ControlPanel :: decomposeValue()
 {
     if( this->value != NULL )
