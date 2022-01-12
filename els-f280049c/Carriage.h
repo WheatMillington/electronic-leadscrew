@@ -23,6 +23,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#ifndef __CARRIAGE_H
+#define __CARRIAGE_H
 
 #include "Configuration.h"
 #include "StepperDrive.h"
@@ -41,18 +43,4 @@ public:
     
 };
 
-int32 Carriage :: getCarriagePosition(void)
-{
-    // Carriage position in hundreths of a mm
-    this->carriagePosition = (( (float) stepperDrive->currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM) + carriageOffset
-        
-    return carriagePosition;
-}
-
-void zeroCarriagePosition(void)
-{
-    // use an offset value to zero carriage position = will allow additional functionality in future
-    carriageOffset = -carriagePosition;
-}
-
-#endif // __STEPPERDRIVE_H
+#endif // __CARRIAGE_H
