@@ -62,6 +62,7 @@ public:
     void setFeed(const FEED_THREAD *feed);
     void setReverse(bool reverse);
     Uint16 getRPM(void);
+    uint32 getCarriagePosition(void);
     bool isAlarm();
 
     bool isPowerOn();
@@ -82,6 +83,11 @@ inline void Core :: setFeed(const FEED_THREAD *feed)
 inline Uint16 Core :: getRPM(void)
 {
     return encoder->getRPM();
+}
+
+inline Uint32 Core :: getCarriagePosition(void);
+{
+    return stepperDrive->getCarriagePosition();
 }
 
 inline bool Core :: isAlarm()
