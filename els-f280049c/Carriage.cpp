@@ -29,9 +29,9 @@
 int32 Carriage :: getCarriagePosition(void)
 {
     // Carriage position in hundreths of a mm
-    this->carriagePosition = (( (float) stepperDrive->currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM) + carriageOffset
+    this->carriagePosition = (( (float) stepperDrive->currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM)
         
-    return carriagePosition;
+    return carriagePosition + carriageOffset;
 }
 
 void zeroCarriagePosition(void)
@@ -40,7 +40,17 @@ void zeroCarriagePosition(void)
     carriageOffset = -carriagePosition;
 }
 
+void setLeftStop(void)
+{
+    carriageLeftStop = carriagePosition;
+    carriageLeftStopActive = true;
+}
 
+void setRightStop(void)
+{
+    carriageRightStop = carriagePosition;
+    carriageRightStopActive = true;
+}
 
 
 
