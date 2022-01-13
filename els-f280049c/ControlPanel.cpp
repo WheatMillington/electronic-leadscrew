@@ -147,6 +147,7 @@ Uint16 ControlPanel :: lcd_char(Uint16 x)
         0b1110000100000000, // 7.
         0b1111111100000000, // 8.
         0b1111011100000000 // 9.
+        0b0000001000000000 // -
     };
     if( x < sizeof(table) ) {
         return table[x];
@@ -262,7 +263,7 @@ void ControlPanel :: decomposeCarriagePosition()
     int i;
 
     for(i=3; i>=0; i--) {
-        this->sevenSegmentData[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
+        this->sevenSegmentData_2[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
         carriageposition = carriageposition / 10;
     }
 }
@@ -281,6 +282,7 @@ void ControlPanel :: decomposeValue()
 
 KEY_REG ControlPanel :: readKeys(void)
 {
+    // Display 1
     SpibRegs.SPICTL.bit.TALK = 1;
 
     CS_ASSERT;
@@ -300,15 +302,42 @@ KEY_REG ControlPanel :: readKeys(void)
     Uint16 byte3 = spiBus->receiveWord();
     Uint16 byte4 = spiBus->receiveWord();
 
+    CS_RELEASE;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+    
+    // Display 2
+    SpiaRegs.SPICTL.bit.TALK = 1;
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0x40));           // auto-increment
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0x42));
+
+    SpiaRegs.SPICTL.bit.TALK = 0;
+
+    DELAY_US(DELAY_BEFORE_READING_US); // delay required by TM1638 per datasheet
+
+    Uint16 byte5 = spiBus->receiveWord();
+    Uint16 byte6 = spiBus->receiveWord();
+    Uint16 byte7 = spiBus->receiveWord();
+    Uint16 byte8 = spiBus->receiveWord();
+        
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+    
     KEY_REG keyMask;
     keyMask.all =
             (byte1 & 0x88) |
             (byte2 & 0x88) >> 1 |
             (byte3 & 0x88) >> 2 |
-            (byte4 & 0x88) >> 3;
-
-    CS_RELEASE;
-    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+            (byte4 & 0x88) >> 3 |
+            (byte5 & 0x88) >> 4 |
+            (byte6 & 0x88) >> 5 |
+            (byte7 & 0x88) >> 6 |
+            (byte8 & 0x88) >> 7;
 
     return keyMask;
 }
