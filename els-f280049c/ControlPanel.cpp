@@ -320,10 +320,10 @@ KEY_REG ControlPanel :: readKeys(void)
 
     DELAY_US(DELAY_BEFORE_READING_US); // delay required by TM1638 per datasheet
 
-    Uint16 byte5 = spiBus->receiveWord();
-    Uint16 byte6 = spiBus->receiveWord();
-    Uint16 byte7 = spiBus->receiveWord();
-    Uint16 byte8 = spiBus->receiveWord();
+    Uint16 byte5 = spiBus->receiveWord_2();
+    Uint16 byte6 = spiBus->receiveWord_2();
+    Uint16 byte7 = spiBus->receiveWord_2();
+    Uint16 byte8 = spiBus->receiveWord_2();
         
     CS_RELEASE_2;
     DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
