@@ -349,7 +349,26 @@ KEY_REG ControlPanel :: getKeys()
 
     configureSpiBus();
 
-    newKeys = readKeys();
+    newKeys = (byte) readKeys();
+    if( isValidKeyState(newKeys) && isStable(newKeys) && newKeys.all != this->keys.all ) {
+        KEY_REG previousKeys = this->keys; // remember the previous stable value
+        this->keys = newKeys;
+
+        if( previousKeys.all == 0 ) {     // only act if the previous stable value was no keys pressed
+            return newKeys;
+        }
+    }
+    return noKeys;
+}
+
+KEY_REG ControlPanel :: getKeys_2()
+{
+    KEY_REG newKeys;
+    static KEY_REG noKeys;
+
+    configureSpiBus();
+
+    newKeys = (byte) readKeys() >> 8;
     if( isValidKeyState(newKeys) && isStable(newKeys) && newKeys.all != this->keys.all ) {
         KEY_REG previousKeys = this->keys; // remember the previous stable value
         this->keys = newKeys;
