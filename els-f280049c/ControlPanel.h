@@ -110,6 +110,14 @@ struct KEY_BITS
     Uint16 FWD_REV:1;
     Uint16 SET:1;
     Uint16 POWER:1;
+    Uint16 ZEROCARRIAGE:1;
+    Uint16 reserved2:1;
+    Uint16 reserved3:1;
+    Uint16 reserved4:1;
+    Uint16 reserved5:1;
+    Uint16 reserved6:1;
+    Uint16 reserved7:1;
+    Uint16 reserved8:1;
 };
 
 typedef union KEY_REG
