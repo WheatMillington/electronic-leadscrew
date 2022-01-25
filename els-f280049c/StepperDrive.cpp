@@ -57,7 +57,7 @@ void StepperDrive :: initHardware(void)
     GpioCtrlRegs.GPAMUX1.bit.GPIO7 = 0;
 
     GpioCtrlRegs.GPADIR.bit.GPIO0 = 1;
-    GpioCtrlRegs.GPADIR.bit.GPIO1 = 1;
+    GpioCtrlRegs.GPADIR.bit.GPIO1 = 1; //troubleshooting, switch back to 1
     GpioCtrlRegs.GPADIR.bit.GPIO6 = 1;
     GpioCtrlRegs.GPADIR.bit.GPIO7 = 0; // input
 
@@ -68,6 +68,13 @@ void StepperDrive :: initHardware(void)
     setEnabled(true);
 }
 
+int32 StepperDrive :: getCarriagePosition(void)
+{
+    // Carriage position in hundreths of a mm
+    this->carriagePosition = ( (float) currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM;
+
+    return carriagePosition;
+}
 
 
 

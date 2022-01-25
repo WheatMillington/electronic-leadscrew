@@ -118,7 +118,6 @@ typedef union KEY_REG
     struct KEY_BITS bit;
 } KEY_REG;
 
-
 class ControlPanel
 {
 private:
@@ -132,7 +131,7 @@ private:
     Uint16 sposition;
     
     // Current carriage position value
-    Int32 carriageposition;
+    int32 carriageposition;
 
     // Current displayed setting value, 4 digits
     const Uint16 *value;
@@ -154,7 +153,8 @@ private:
     Uint16 brightness;
 
     // Derived state, calculated internally
-    Uint16 sevenSegmentData[8];
+    Uint16 sevenSegmentData[8]; // Display 1
+    Uint16 sevenSegmentData_2[8]; // Display 2
 
     // dummy register, for SPI
     Uint16 dummy;
@@ -196,7 +196,7 @@ public:
     void setValue(const Uint16 *value);
     
     // set the carriage position to display
-    void setCarriagePosition(int32 carriageposition)
+    void setCarriagePosition(int32 carriageposition);
 
     // set the LED states
     void setLEDs(LED_REG leds);

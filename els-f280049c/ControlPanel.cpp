@@ -219,7 +219,7 @@ void ControlPanel :: sendData()
         }
         else
         {
-            spiBus->sendWord_2(this->sevenSegmentData[i]);
+            spiBus->sendWord_2(this->sevenSegmentData_2[i]);
         }
         spiBus->sendWord_2( (ledMask & 0x80) ? 0xff00 : 0x0000 );
         ledMask <<= 1;
@@ -261,8 +261,12 @@ void ControlPanel :: decomposeCarriagePosition()
     int32 carriageposition = this->carriageposition;
     int i;
 
-    for(i=3; i>=0; i--) {
-        this->sevenSegmentData[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
+    for(i=7; i>=0; i--) {
+        if (i == 4 ) {
+              this->sevenSegmentData_2[i] = lcd_char((carriageposition % 10) + 11);
+        } else {
+            this->sevenSegmentData_2[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
+        }
         carriageposition = carriageposition / 10;
     }
 }
@@ -349,7 +353,6 @@ bool ControlPanel :: isValidKeyState(KEY_REG testKeys) {
     return false;
 }
 
-
 bool ControlPanel :: isStable(KEY_REG testKeys) {
     // don't trust any read key state until we've seen it multiple times consecutively (noise filter)
     if( testKeys.all != stableKeys.all )
@@ -392,6 +395,8 @@ void ControlPanel :: refresh(bool showposition)
     }
 
     decomposeValue();
+
+    decomposeCarriagePosition();
 
     sendData();
 }

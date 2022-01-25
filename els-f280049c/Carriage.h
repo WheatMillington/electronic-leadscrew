@@ -35,7 +35,6 @@ private:
     StepperDrive *stepperDrive;
     
     int32 carriagePosition;
-    int32 carriageOffset;
 
 public:
     int32 getCarriagePosition(void);
@@ -43,6 +42,8 @@ public:
     void setLeftStop(void);
     void setRightStop(void);
     
+    int32 carriageOffset;
+
     bool carriageLeftStopActive;
     bool carriageRightStopActive;
     

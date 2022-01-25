@@ -74,10 +74,11 @@
 class StepperDrive
 {
 private:
+
     //
-    // Current position of the motor, in steps
+    // Desired position of the motor, in steps
     //
-    int32 currentPosition;
+    int32 desiredPosition;
 
     //
     // current state-machine state
@@ -97,12 +98,18 @@ private:
     int32 carriagePosition;
 
 public:
+    //
+    // Current position of the motor, in steps
+    //
+    int32 currentPosition;
+
     StepperDrive();
     void initHardware(void);
 
     void setDesiredPosition(int32 steps);
     void incrementCurrentPosition(int32 increment);
     void setCurrentPosition(int32 position);
+    int32 getCarriagePosition(void);
 
     bool checkStepBacklog();
 
@@ -209,14 +216,6 @@ inline void StepperDrive :: ISR(void)
         // not enabled; just keep current position in sync
         this->currentPosition = this->desiredPosition;
     }
-}
-
-int32 StepperDrive :: getCarriagePosition(void)
-{
-    // Carriage position in hundreths of a mm
-    this->carriagePosition = ( (float) currentPosition / (float) STEPPER_RESOLUTION) * LEADSCREW_HMM
-        
-    return carriagePosition;
 }
 
 #endif // __STEPPERDRIVE_H

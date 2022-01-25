@@ -163,7 +163,7 @@ void UserInterface :: loop( void )
     Uint16 currentSPosition = encoder->getSPosition();
   
     // read the current carriage position to keep this up to date
-    Int32 carriagePosition = core->getCarriagePosition();
+    int32 carriagePosition = core->getCarriagePosition();
 
     // display an override message, if there is one
     overrideMessage();
@@ -242,6 +242,8 @@ void UserInterface :: loop( void )
     } else {
         controlPanel->setRPM(currentRpm);
     }
+
+    controlPanel->setCarriagePosition(carriagePosition);
 
     if( ! core->isPowerOn() )
     {
