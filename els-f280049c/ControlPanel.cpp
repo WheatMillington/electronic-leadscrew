@@ -348,10 +348,10 @@ KEY_REG ControlPanel :: readKeys(void)
             (byte2 & 0x88) >> 1 |
             (byte3 & 0x88) >> 2 |
             (byte4 & 0x88) >> 3 |
-            (byte5 & 0x88) >> 4 |
-            (byte6 & 0x88) >> 5 |
-            (byte7 & 0x88) >> 6 |
-            (byte8 & 0x88) >> 7;
+            (byte5 & 0x88) << 1 |
+            (byte6 & 0x88) << 2 |
+            (byte7 & 0x88) << 3 |
+            (byte8 & 0x88) << 4;
 
     return keyMask;
 }
