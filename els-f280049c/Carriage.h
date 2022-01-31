@@ -32,12 +32,9 @@
 class Carriage
 {
 private: 
-    StepperDrive *stepperDrive;
-    
-    int32 carriagePosition;
 
 public:
-    int32 getCarriagePosition(void);
+    StepperDrive *stepperDrive;
     void zeroCarriagePosition(void);
     void setLeftStop(void);
     void setRightStop(void);
@@ -49,6 +46,7 @@ public:
     
     int32 carriageLeftStop;
     int32 carriageRightStop;
+    int32 carriagePosition;
     
     
 };

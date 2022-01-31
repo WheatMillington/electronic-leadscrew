@@ -79,6 +79,7 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     this->thread = false; // start out with feeds
     this->reverse = false; // start out going forward
     this->sposition = false; // start out showing RPM
+    core->setPowerOn(false); // start out with power off
 
     this->feedTable = NULL;
 
@@ -112,7 +113,7 @@ LED_REG UserInterface::calculateLEDs()
     else
     {
         // power is off
-        leds.all = 0;
+        // leds.all = 0;
     }
 
     return leds;
@@ -182,17 +183,21 @@ void UserInterface :: loop( void )
         }
     }
 
+/*    if( keys.bit.ZERODRO ) {
+        carriage->zeroCarriagePosition();
+    }
+*/
 
     if( currentRpm == 0 )
     {
         // these keys should only be sensitive when the machine is stopped
         if( keys.bit.POWER ) {
             this->core->setPowerOn(!this->core->isPowerOn());
-            clearMessage();
+            // clearMessage(); disabled this line as want Power On/Off to only affect Enable pin, not make UI changes
         }
 
         // these should only work when the power is on
-        if( this->core->isPowerOn() ) {
+        //if( this->core->isPowerOn() ) { disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
             if( keys.bit.IN_MM )
             {
                 this->metric = ! this->metric;
@@ -208,7 +213,7 @@ void UserInterface :: loop( void )
                 this->reverse = ! this->reverse;
                 core->setReverse(this->reverse);
             }
-        }
+
     }
 
 #ifdef IGNORE_ALL_KEYS_WHEN_RUNNING
@@ -217,7 +222,7 @@ void UserInterface :: loop( void )
 #endif // IGNORE_ALL_KEYS_WHEN_RUNNING
 
         // these should only work when the power is on
-        if( this->core->isPowerOn() ) {
+       // if( this->core->isPowerOn() ) { disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
             // these keys can be operated when the machine is running
             if( keys.bit.UP )
             {
@@ -227,7 +232,7 @@ void UserInterface :: loop( void )
             {
                 core->setFeed(feedTable->previous());
             }
-        }
+        //}
 
 #ifdef IGNORE_ALL_KEYS_WHEN_RUNNING
     }
@@ -245,10 +250,10 @@ void UserInterface :: loop( void )
 
     controlPanel->setCarriagePosition(carriagePosition);
 
-    if( ! core->isPowerOn() )
+    /* if( ! core->isPowerOn() ) disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
     {
         controlPanel->setValue(VALUE_BLANK);
-    }
+    }*/
 
     controlPanel->refresh(sposition);
 }

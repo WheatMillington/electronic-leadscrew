@@ -64,8 +64,8 @@
 //================================================================================
 
 // Steps and microsteps
-#define STEPPER_MICROSTEPS 8
-#define STEPPER_RESOLUTION 200
+#define STEPPER_MICROSTEPS 1
+#define STEPPER_RESOLUTION 1600
 
 // Separate step and microstep settings for feed rates.  Redefine these if your
 // lathe has a separate feed drive train with a different ratio.

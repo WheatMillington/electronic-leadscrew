@@ -91,11 +91,6 @@ private:
     // Is the drive enabled?
     //
     bool enabled;
-    
-    //
-    // Set the carriage position
-    //
-    int32 carriagePosition;
 
 public:
     //
@@ -103,13 +98,14 @@ public:
     //
     int32 currentPosition;
 
+    int32 getStepperPosition(void);
+
     StepperDrive();
     void initHardware(void);
 
     void setDesiredPosition(int32 steps);
     void incrementCurrentPosition(int32 increment);
     void setCurrentPosition(int32 position);
-    int32 getCarriagePosition(void);
 
     bool checkStepBacklog();
 
@@ -135,6 +131,7 @@ inline void StepperDrive :: setCurrentPosition(int32 position)
 {
     this->currentPosition = position;
 }
+
 
 inline bool StepperDrive :: checkStepBacklog()
 {
@@ -216,6 +213,7 @@ inline void StepperDrive :: ISR(void)
         // not enabled; just keep current position in sync
         this->currentPosition = this->desiredPosition;
     }
+
 }
 
 #endif // __STEPPERDRIVE_H

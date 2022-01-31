@@ -31,6 +31,7 @@
 #include "Encoder.h"
 #include "ControlPanel.h"
 #include "Tables.h"
+#include "Carriage.h"
 
 
 class Core
@@ -38,6 +39,11 @@ class Core
 private:
     Encoder *encoder;
     StepperDrive *stepperDrive;
+    Carriage *carriage;
+
+    int32 currentCarriagePosition;
+    int32 currentStepperPosition;
+    int32 previousStepperPosition;
 
 #ifdef USE_FLOATING_POINT
     float feed;
@@ -62,7 +68,7 @@ public:
     void setFeed(const FEED_THREAD *feed);
     void setReverse(bool reverse);
     Uint16 getRPM(void);
-    int32 getCarriagePosition(void);
+    int32 getCarriagePosition();
     bool isAlarm();
 
     bool isPowerOn();
@@ -87,7 +93,14 @@ inline Uint16 Core :: getRPM(void)
 
 inline int32 Core :: getCarriagePosition(void)
 {
-    return stepperDrive->getCarriagePosition();
+    currentStepperPosition = stepperDrive->getStepperPosition();
+
+    currentCarriagePosition += ((currentStepperPosition - previousStepperPosition) * LEADSCREW_HMM * 100 ) / STEPPER_RESOLUTION;
+
+    previousStepperPosition = currentStepperPosition;
+
+    return currentCarriagePosition / 100;
+
 }
 
 inline bool Core :: isAlarm()

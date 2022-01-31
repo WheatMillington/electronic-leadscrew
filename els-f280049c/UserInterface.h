@@ -30,6 +30,7 @@
 #include "ControlPanel.h"
 #include "Core.h"
 #include "Tables.h"
+#include "Carriage.h"
 
 typedef struct MESSAGE
 {
@@ -45,6 +46,7 @@ private:
     Core *core;
     Encoder *encoder;
     FeedTableFactory *feedTableFactory;
+    Carriage *carriage;
 
     bool metric;
     bool thread;

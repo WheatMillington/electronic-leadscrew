@@ -146,7 +146,8 @@ Uint16 ControlPanel :: lcd_char(Uint16 x)
         0b1011111100000000, // 6.
         0b1110000100000000, // 7.
         0b1111111100000000, // 8.
-        0b1111011100000000 // 9.
+        0b1111011100000000, // 9.
+        0b0000001000000000 // -
     };
     if( x < sizeof(table) ) {
         return table[x];
@@ -213,14 +214,15 @@ void ControlPanel :: sendData()
     CS_ASSERT_2;
     spiBus->sendWord_2(reverse_byte(0xc0));           // display data
     for( i=0; i < 8; i++ ) {
-        if( this->message != NULL )
-        {
-            spiBus->sendWord_2(this->message[i]);
-        }
-        else
-        {
+ // Disabled this loop to only show message on display 1
+ //       if( this->message != NULL )
+ //       {
+ //           spiBus->sendWord_2(this->message[i]);
+ //       }
+ //       else
+ //       {
             spiBus->sendWord_2(this->sevenSegmentData_2[i]);
-        }
+ //       }
         spiBus->sendWord_2( (ledMask & 0x80) ? 0xff00 : 0x0000 );
         ledMask <<= 1;
     }
@@ -258,17 +260,24 @@ void ControlPanel :: decomposeSPosition()
 
 void ControlPanel :: decomposeCarriagePosition()
 {
-    int32 carriageposition = this->carriageposition;
+    if (this->carriageposition < 0) {
+        carriageposition = -this->carriageposition;
+        sevenSegmentData_2[0] = lcd_char(21);
+    } else {
+        carriageposition = this->carriageposition;
+    }
+
     int i;
 
-    for(i=7; i>=0; i--) {
-        if (i == 4 ) {
+    for(i=7; i>=1; i--) {
+        if (i == 5 ) {
               this->sevenSegmentData_2[i] = lcd_char((carriageposition % 10) + 11);
         } else {
-            this->sevenSegmentData_2[i] = (carriageposition == 0 && i != 3) ? 0 : lcd_char(carriageposition % 10);
+            this->sevenSegmentData_2[i] = (carriageposition == 0 && i != 6) ? 0 : lcd_char(carriageposition % 10);
         }
         carriageposition = carriageposition / 10;
     }
+
 }
 
 void ControlPanel :: decomposeValue()
@@ -285,6 +294,7 @@ void ControlPanel :: decomposeValue()
 
 KEY_REG ControlPanel :: readKeys(void)
 {
+    // Display 1
     SpibRegs.SPICTL.bit.TALK = 1;
 
     CS_ASSERT;
@@ -304,15 +314,44 @@ KEY_REG ControlPanel :: readKeys(void)
     Uint16 byte3 = spiBus->receiveWord();
     Uint16 byte4 = spiBus->receiveWord();
 
+    CS_RELEASE;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    // Display 2
+    SpiaRegs.SPICTL.bit.TALK = 1;
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0x40));           // auto-increment
+    CS_RELEASE_2;
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    CS_ASSERT_2;
+    spiBus->sendWord_2(reverse_byte(0x42));
+
+    SpiaRegs.SPICTL.bit.TALK = 0;
+
+    DELAY_US(DELAY_BEFORE_READING_US); // delay required by TM1638 per datasheet
+
+    Uint16 byte5 = spiBus->receiveWord_2();
+    Uint16 byte6 = spiBus->receiveWord_2();
+    Uint16 byte7 = spiBus->receiveWord_2();
+    Uint16 byte8 = spiBus->receiveWord_2();
+
+    CS_RELEASE_2;
+
+    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+
+    // Both displays
     KEY_REG keyMask;
     keyMask.all =
             (byte1 & 0x88) |
             (byte2 & 0x88) >> 1 |
             (byte3 & 0x88) >> 2 |
-            (byte4 & 0x88) >> 3;
-
-    CS_RELEASE;
-    DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
+            (byte4 & 0x88) >> 3 |
+            (byte5 & 0x88) >> 4 |
+            (byte6 & 0x88) >> 5 |
+            (byte7 & 0x88) >> 6 |
+            (byte8 & 0x88) >> 7;
 
     return keyMask;
 }
