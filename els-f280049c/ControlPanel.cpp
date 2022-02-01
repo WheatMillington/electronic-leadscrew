@@ -386,6 +386,14 @@ bool ControlPanel :: isValidKeyState(KEY_REG testKeys) {
     case 1 << 5:
     case 1 << 6:
     case 1 << 7:
+    case 1 << 8:
+    case 1 << 9:
+    case 1 << 10:
+    case 1 << 11:
+    case 1 << 12:
+    case 1 << 13:
+    case 1 << 14:
+    case 1 << 15:
         return true;
     }
 
