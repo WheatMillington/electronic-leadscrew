@@ -28,13 +28,13 @@
 
 void Carriage :: setLeftStop(void)
 {
-    carriageLeftStop = carriagePosition;
+    carriageLeftStop = core->currentCarriagePosition;
     carriageLeftStopActive = true;
 }
 
 void Carriage :: setRightStop(void)
 {
-    carriageRightStop = carriagePosition;
+    carriageRightStop = core->currentCarriagePosition;
     carriageRightStopActive = true;
 }
 
