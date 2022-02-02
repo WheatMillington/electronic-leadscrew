@@ -38,5 +38,8 @@ void Carriage :: setRightStop(void)
     carriageRightStopActive = true;
 }
 
-
-
+void Carriage :: zeroCarriagePosition(void)
+{
+    core->currentCarriagePosition = 0;
+    core->previousCarriagePosition = 0;
+}
