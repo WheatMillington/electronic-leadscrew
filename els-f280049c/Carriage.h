@@ -28,6 +28,7 @@
 
 #include "Configuration.h"
 #include "StepperDrive.h"
+#include "Core.h"
 
 class Carriage
 {
