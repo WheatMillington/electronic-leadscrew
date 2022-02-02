@@ -183,62 +183,57 @@ void UserInterface :: loop( void )
         }
     }
 
-/*    if( keys.bit.ZERODRO ) {
+    if( keys.bit.ZERODRO ) {
         carriage->zeroCarriagePosition();
     }
-*/
+
 
     if( currentRpm == 0 )
     {
         // these keys should only be sensitive when the machine is stopped
-        if( keys.bit.POWER ) {
-            this->core->setPowerOn(!this->core->isPowerOn());
-            // clearMessage(); disabled this line as want Power On/Off to only affect Enable pin, not make UI changes
+        if( keys.bit.IN_MM )
+        {
+            this->metric = ! this->metric;
+            core->setFeed(loadFeedTable());
+        }
+        if( keys.bit.FEED_THREAD )
+        {
+            this->thread = ! this->thread;
+            core->setFeed(loadFeedTable());
+        }
+        if( keys.bit.FWD_REV )
+        {
+            this->reverse = ! this->reverse;
+            core->setReverse(this->reverse);
         }
 
-        // these should only work when the power is on
-        //if( this->core->isPowerOn() ) { disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
-            if( keys.bit.IN_MM )
-            {
-                this->metric = ! this->metric;
-                core->setFeed(loadFeedTable());
-            }
-            if( keys.bit.FEED_THREAD )
-            {
-                this->thread = ! this->thread;
-                core->setFeed(loadFeedTable());
-            }
-            if( keys.bit.FWD_REV )
-            {
-                this->reverse = ! this->reverse;
-                core->setReverse(this->reverse);
-            }
-
     }
 
-#ifdef IGNORE_ALL_KEYS_WHEN_RUNNING
-    if( currentRpm == 0 )
-        {
-#endif // IGNORE_ALL_KEYS_WHEN_RUNNING
-
-        // these should only work when the power is on
-       // if( this->core->isPowerOn() ) { disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
-            // these keys can be operated when the machine is running
-            if( keys.bit.UP )
-            {
-                core->setFeed(feedTable->next());
-            }
-            if( keys.bit.DOWN )
-            {
-                core->setFeed(feedTable->previous());
-            }
-        //}
-
-#ifdef IGNORE_ALL_KEYS_WHEN_RUNNING
+// these keys can be operated when the machine is running
+    if( keys.bit.POWER )
+    {
+      this->core->setPowerOn(!this->core->isPowerOn());
     }
-#endif // IGNORE_ALL_KEYS_WHEN_RUNNING
 
-    // update the control panel
+    if( keys.bit.UP )
+    {
+        core->setFeed(feedTable->next());
+    }
+  
+    if( keys.bit.DOWN )
+    {
+        core->setFeed(feedTable->previous());
+    }
+    
+    if( keys.bit.ZERODRO )
+    {
+        carriage->zeroCarriagePosition();
+        // does this need to be done via a function call to core? see above
+    }
+  
+  
+
+// update the control panel
     controlPanel->setLEDs(calculateLEDs());
     controlPanel->setValue(feedTable->current()->display);
 
