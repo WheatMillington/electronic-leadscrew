@@ -70,7 +70,7 @@ void StepperDrive :: initHardware(void)
 
 int32 StepperDrive :: getStepperPosition()
 {
-    return currentPosition;
+    return desiredPosition;
 }
 
 

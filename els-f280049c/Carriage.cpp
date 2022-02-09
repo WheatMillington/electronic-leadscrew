@@ -28,18 +28,17 @@
 
 void Carriage :: setLeftStop(void)
 {
-    carriageLeftStop = core->currentCarriagePosition;
+//    carriageLeftStop = core->getCarriagePosition();
     carriageLeftStopActive = true;
 }
 
 void Carriage :: setRightStop(void)
 {
-    carriageRightStop = core->currentCarriagePosition;
+//    carriageRightStop = core->getCarriagePosition();
     carriageRightStopActive = true;
 }
 
 void Carriage :: zeroCarriagePosition(void)
 {
-    core->currentCarriagePosition = 0;
-    core->previousCarriagePosition = 0;
+//    core->currentCarriagePosition = 0;
 }

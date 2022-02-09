@@ -39,11 +39,11 @@ class Core
 private:
     Encoder *encoder;
     StepperDrive *stepperDrive;
-    Carriage *carriage;
 
-    int32 currentCarriagePosition;
-    int32 currentStepperPosition;
-    int32 previousStepperPosition;
+    int32 incrementCount;
+    int32 currentCount;
+    int32 previousCount;
+    int64 carriagePosition;
 
 #ifdef USE_FLOATING_POINT
     float feed;
@@ -68,13 +68,15 @@ public:
     void setFeed(const FEED_THREAD *feed);
     void setReverse(bool reverse);
     Uint16 getRPM(void);
-    int32 getCarriagePosition();
+    int32 getCarriagePosition(const FEED_THREAD *feed);
     bool isAlarm();
 
     bool isPowerOn();
     void setPowerOn(bool);
 
     void ISR( void );
+
+    void zeroCarriagePosition();
 };
 
 inline void Core :: setFeed(const FEED_THREAD *feed)
@@ -91,16 +93,25 @@ inline Uint16 Core :: getRPM(void)
     return encoder->getRPM();
 }
 
-inline int32 Core :: getCarriagePosition(void)
+inline int32 Core :: getCarriagePosition(const FEED_THREAD *feed)
 {
-    currentStepperPosition = stepperDrive->getStepperPosition();
+    currentCount = encoder->getCount();
 
-    currentCarriagePosition += ((currentStepperPosition - previousStepperPosition) * LEADSCREW_HMM * 100 ) / STEPPER_RESOLUTION;
+    incrementCount = currentCount - previousCount;
 
-    previousStepperPosition = currentStepperPosition;
+    int32 feedrate = (float)feed->numerator / (float)STEPPER_RESOLUTION;
 
-    return currentCarriagePosition / 100;
+    carriagePosition += (incrementCount * feedrate * 10000) / ENCODER_RESOLUTION;
 
+    previousCount = encoder->getCount();
+
+    return carriagePosition / 10000;
+}
+
+inline void Core :: zeroCarriagePosition(void)
+{
+    //encoder->zeroCount();
+    this->carriagePosition = 0;
 }
 
 inline bool Core :: isAlarm()

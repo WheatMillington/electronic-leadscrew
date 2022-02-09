@@ -265,6 +265,7 @@ void ControlPanel :: decomposeCarriagePosition()
         sevenSegmentData_2[0] = lcd_char(21);
     } else {
         carriageposition = this->carriageposition;
+        sevenSegmentData_2[0] = 0;
     }
 
     int i;
@@ -393,7 +394,7 @@ bool ControlPanel :: isValidKeyState(KEY_REG testKeys) {
     case 1 << 12:
     case 1 << 13:
     case 1 << 14:
-    case 1 << 15:
+//    case 1 << 15:
         return true;
     }
 

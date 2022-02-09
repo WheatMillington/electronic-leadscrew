@@ -65,8 +65,6 @@ const MESSAGE BACKLOG_PANIC_MESSAGE_2 =
  .next = &BACKLOG_PANIC_MESSAGE_1
 };
 
-
-
 const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
 
 UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory)
@@ -164,7 +162,7 @@ void UserInterface :: loop( void )
     Uint16 currentSPosition = encoder->getSPosition();
   
     // read the current carriage position to keep this up to date
-    int32 carriagePosition = core->getCarriagePosition();
+    int32 carriagePosition = core->getCarriagePosition(loadFeedTable());
 
     // display an override message, if there is one
     overrideMessage();
@@ -184,7 +182,7 @@ void UserInterface :: loop( void )
     }
 
     if( keys.bit.ZERODRO ) {
-        carriage->zeroCarriagePosition();
+        core->zeroCarriagePosition();
     }
 
 
@@ -224,13 +222,6 @@ void UserInterface :: loop( void )
     {
         core->setFeed(feedTable->previous());
     }
-    
-    if( keys.bit.ZERODRO )
-    {
-        carriage->zeroCarriagePosition();
-        // does this need to be done via a function call to core? see above
-    }
-  
   
 
 // update the control panel

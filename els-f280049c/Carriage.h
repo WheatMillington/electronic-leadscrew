@@ -28,7 +28,7 @@
 
 #include "Configuration.h"
 #include "StepperDrive.h"
-#include "Core.h"
+//#include "Core.h"
 
 class Carriage
 {
@@ -36,6 +36,7 @@ private:
 
 public:
     StepperDrive *stepperDrive;
+//    Core *core;
     void zeroCarriagePosition(void);
     void setLeftStop(void);
     void setRightStop(void);

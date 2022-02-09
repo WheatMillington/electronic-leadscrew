@@ -121,9 +121,31 @@ Uint16 Encoder :: getSPosition(void)
     if ( ENCODER_REGS.QEPCTL.bit.SWI == 1 ) {
         ENCODER_REGS.QEPCTL.bit.SWI = 0;
         sposition = 0;
-    }
+}
 
-    sposition = (getPosition() % ENCODER_RESOLUTION * 3600) / ENCODER_RESOLUTION;
+    sposition = ((Uint32) getCount() % ENCODER_RESOLUTION * 3600) / ENCODER_RESOLUTION;
 
     return sposition;
+}
+
+int64 Encoder :: getCount(void)
+{
+    currentCount = getPosition();
+
+    if (currentCount - previousCount > 0xffff) {
+        overflowCount -= ENCODER_REGS.QPOSMAX;
+    } else if (previousCount - currentCount > 0xffff) {
+        overflowCount += ENCODER_REGS.QPOSMAX;
+    }
+
+    previousCount = currentCount;
+
+    return currentCount + overflowCount + zeroOffset;
+}
+
+void Encoder :: zeroCount(void)
+{
+    overflowCount = 0;
+    zeroOffset = -currentCount;
+    previousCount = currentCount;
 }
