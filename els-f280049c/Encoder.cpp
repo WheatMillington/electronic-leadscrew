@@ -138,7 +138,7 @@ int64 Encoder :: getCount(void)
         overflowCount += ENCODER_REGS.QPOSMAX;
     }
 
-    previousCount = currentCount;
+    previousCount = currentCount + overflowCount + zeroOffset;
 
     return currentCount + overflowCount + zeroOffset;
 }
@@ -147,5 +147,4 @@ void Encoder :: zeroCount(void)
 {
     overflowCount = 0;
     zeroOffset = -currentCount;
-    previousCount = currentCount;
 }
