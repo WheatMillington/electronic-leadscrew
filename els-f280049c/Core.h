@@ -95,23 +95,24 @@ inline Uint16 Core :: getRPM(void)
 
 inline int32 Core :: getCarriagePosition(const FEED_THREAD *feed)
 {
-    currentCount = encoder->getCount();
+    if ( isPowerOn() ) {
+        currentCount = encoder->getCount();
+        incrementCount = currentCount - previousCount;
+        int32 feedrate = (float)feed->numerator / (float)STEPPER_RESOLUTION;
+        carriagePosition += (incrementCount * feedrate * 10000) / ENCODER_RESOLUTION;
+        previousCount = currentCount;
 
-    incrementCount = currentCount - previousCount;
-
-    int32 feedrate = (float)feed->numerator / (float)STEPPER_RESOLUTION;
-
-    carriagePosition += (incrementCount * feedrate * 10000) / ENCODER_RESOLUTION;
-
-    previousCount = encoder->getCount();
-
-    return carriagePosition / 10000;
+        return carriagePosition / 10000;
+    } else {  // if power is off, just keep track of count, don't increment
+        currentCount = encoder->getCount();
+        previousCount = currentCount;
+    }
 }
 
 inline void Core :: zeroCarriagePosition(void)
 {
-    //encoder->zeroCount();
     this->carriagePosition = 0;
+    encoder->zeroCount();
 }
 
 inline bool Core :: isAlarm()
