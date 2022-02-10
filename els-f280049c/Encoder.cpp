@@ -122,8 +122,7 @@ Uint16 Encoder :: getSPosition(void)
         ENCODER_REGS.QEPCTL.bit.SWI = 0;
         sposition = 0;
 }
-
-    sposition = ((Uint32) getCount() % ENCODER_RESOLUTION * 3600) / ENCODER_RESOLUTION;
+    sposition = (getCount() % ENCODER_RESOLUTION * 3600) / ENCODER_RESOLUTION;
 
     return sposition;
 }
@@ -145,6 +144,6 @@ int64 Encoder :: getCount(void)
 
 void Encoder :: zeroCount(void)
 {
-    overflowCount = 0;
-    zeroOffset = -currentCount;
+    this->overflowCount = 0;
+    this->zeroOffset = -currentCount;
 }

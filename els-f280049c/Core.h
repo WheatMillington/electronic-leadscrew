@@ -41,8 +41,8 @@ private:
     StepperDrive *stepperDrive;
 
     int32 incrementCount;
-    int32 currentCount;
-    int32 previousCount;
+    int32 carriageCurrentCount;
+    int32 carriagePreviousCount;
     int64 carriagePosition;
 
 #ifdef USE_FLOATING_POINT
@@ -69,6 +69,7 @@ public:
     void setReverse(bool reverse);
     Uint16 getRPM(void);
     int32 getCarriagePosition(const FEED_THREAD *feed);
+    Uint16 getSPosition(void);
     bool isAlarm();
 
     bool isPowerOn();
@@ -93,24 +94,34 @@ inline Uint16 Core :: getRPM(void)
     return encoder->getRPM();
 }
 
+inline Uint16 Core :: getSPosition(void)
+{
+    return encoder->getSPosition();
+}
+
 inline int32 Core :: getCarriagePosition(const FEED_THREAD *feed)
 {
     if ( isPowerOn() ) {
-        currentCount = encoder->getCount();
-        incrementCount = currentCount - previousCount;
+        carriageCurrentCount = encoder->getCount();
+        incrementCount = carriageCurrentCount - carriagePreviousCount;
         int32 feedrate = (float)feed->numerator / (float)STEPPER_RESOLUTION;
         carriagePosition += (incrementCount * feedrate * 10000) / ENCODER_RESOLUTION;
-        previousCount = currentCount;
+        carriagePreviousCount = carriageCurrentCount;
 
-        return carriagePosition / 10000;
     } else {  // if power is off, just keep track of count, don't increment
-        currentCount = encoder->getCount();
-        previousCount = currentCount;
+        carriageCurrentCount = encoder->getCount();
+        carriagePreviousCount = carriageCurrentCount;
     }
+
+    return carriagePosition / 10000;
+
 }
 
 inline void Core :: zeroCarriagePosition(void)
 {
+    this->carriageCurrentCount = 0;
+    this->carriagePreviousCount = 0;
+    this->incrementCount = 0;
     this->carriagePosition = 0;
     encoder->zeroCount();
 }

@@ -41,7 +41,7 @@ Core :: Core( Encoder *encoder, StepperDrive *stepperDrive )
     this->previousFeedDirection = 0;
     this->previousFeed = NULL;
 
-    this->previousCount = encoder->getCount();
+    this->carriagePreviousCount = encoder->getCount();
     encoder->zeroCount();
 
     this->powerOn = true; // default to power on

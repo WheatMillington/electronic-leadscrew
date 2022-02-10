@@ -44,7 +44,6 @@ class UserInterface
 private:
     ControlPanel *controlPanel;
     Core *core;
-    Encoder *encoder;
     FeedTableFactory *feedTableFactory;
     Carriage *carriage;
 

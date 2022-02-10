@@ -159,7 +159,7 @@ void UserInterface :: loop( void )
     Uint16 currentRpm = core->getRPM();
 
     // read the current spindle position to keep this up to date
-    Uint16 currentSPosition = encoder->getSPosition();
+    Uint16 currentSPosition = core->getSPosition();
   
     // read the current carriage position to keep this up to date
     int32 carriagePosition = core->getCarriagePosition(loadFeedTable());
