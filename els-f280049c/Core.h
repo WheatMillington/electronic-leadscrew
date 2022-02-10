@@ -44,6 +44,14 @@ private:
     int32 carriageCurrentCount;
     int32 carriagePreviousCount;
     int64 carriagePosition;
+    
+    int64 setLeftStop();
+    int64 setRightStop();
+    
+    int64 leftStop;
+    int64 rightStop;
+    bool leftStopActive;
+    bool rightStopActive;
 
 #ifdef USE_FLOATING_POINT
     float feed;
@@ -114,7 +122,22 @@ inline int32 Core :: getCarriagePosition(const FEED_THREAD *feed)
     }
 
     return carriagePosition / 10000;
+}
 
+inline int64 Core :: setLeftStop()
+{
+    leftStop = this->carriagePosition;
+    leftStopActive = true;
+    
+    return leftStop;
+}
+
+inline int64 Core :: setRightStop()
+{
+    rightStop = this->carriagePosition;
+    rightStopActive = true;
+    
+    return rightStop;
 }
 
 inline void Core :: zeroCarriagePosition(void)
