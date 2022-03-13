@@ -30,7 +30,6 @@
 #include "ControlPanel.h"
 #include "Core.h"
 #include "Tables.h"
-#include "Carriage.h"
 
 typedef struct MESSAGE
 {
@@ -45,12 +44,12 @@ private:
     ControlPanel *controlPanel;
     Core *core;
     FeedTableFactory *feedTableFactory;
-    Carriage *carriage;
 
     bool metric;
     bool thread;
     bool reverse;
     bool sposition;
+    bool holdKey;
 
     FeedTable *feedTable;
 
@@ -64,6 +63,10 @@ private:
     void setMessage(const MESSAGE *message);
     void overrideMessage( void );
     void clearMessage( void );
+
+    bool leftJogToggle;
+    bool rightJogToggle;
+    bool reverseState;
 
 public:
     UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory);

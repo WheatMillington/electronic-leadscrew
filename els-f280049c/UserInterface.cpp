@@ -65,7 +65,43 @@ const MESSAGE BACKLOG_PANIC_MESSAGE_2 =
  .next = &BACKLOG_PANIC_MESSAGE_1
 };
 
-const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
+const MESSAGE JOGRIGHT =
+{
+ .message = { LETTER_J, LETTER_O, LETTER_G, BLANK, LETTER_R, BLANK, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+const MESSAGE JOGLEFT =
+{
+ .message = { LETTER_J, LETTER_O, LETTER_G, BLANK, LETTER_L, BLANK, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+const MESSAGE FEEDRIGHT =
+{
+ .message = { LETTER_F, LETTER_E, LETTER_E, LETTER_D, BLANK, LETTER_R, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+const MESSAGE FEEDLEFT =
+{
+ .message = { LETTER_F, LETTER_E, LETTER_E, LETTER_D, BLANK, LETTER_L, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+const MESSAGE RIGHT_STOP =
+{
+ .message = { LETTER_R, BLANK, LETTER_S, LETTER_T, LETTER_O, LETTER_P, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+const MESSAGE LEFT_STOP =
+{
+ .message = { LETTER_L, BLANK, LETTER_S, LETTER_T, LETTER_O, LETTER_P, BLANK, BLANK},
+ .displayTime = UI_REFRESH_RATE_HZ * .5
+};
+
+//const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
 
 UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory)
 {
@@ -78,6 +114,7 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     this->reverse = false; // start out going forward
     this->sposition = false; // start out showing RPM
     core->setPowerOn(false); // start out with power off
+    core->setEnabled(true);
 
     this->feedTable = NULL;
 
@@ -86,6 +123,7 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     // initialize the core so we start up correctly
     core->setReverse(this->reverse);
     core->setFeed(loadFeedTable());
+    core->setJogSpeed(1);
 
     setMessage(&STARTUP_MESSAGE_1);
 }
@@ -113,6 +151,16 @@ LED_REG UserInterface::calculateLEDs()
         // power is off
         // leds.all = 0;
     }
+
+    leds.bit.LSTOP = core->leftStopActive;
+    leds.bit.RSTOP = core->rightStopActive;
+    leds.bit.FEEDINGLEFT = core->feedingLeft;
+    leds.bit.FEEDINGRIGHT = core->feedingRight;
+    leds.bit.JOGGING = core->joggingLeft || core->joggingRight;
+    leds.bit.JOG1 = core->jog1Active;
+    leds.bit.JOG2 = core->jog2Active;
+    leds.bit.JOG3 = core->jog3Active;
+
 
     return leds;
 }
@@ -171,7 +219,54 @@ void UserInterface :: loop( void )
     keys = controlPanel->getKeys();
 
     // respond to keypresses
+
+    // Only respond when power is OFF
+    if( !core->isPowerOn() ) {
+        if (keys.bit.FEEDRIGHT) {
+            setMessage(&FEEDRIGHT);
+            core->feedRight();
+        }
+
+        if (keys.bit.FEEDLEFT) {
+            setMessage(&FEEDLEFT);
+            core->feedLeft();
+        }
+    }
+
     // respond regardless of machine state
+    if(keys.bit.JOGLEFT || keys.bit.JOGRIGHT) {
+        holdKey = true;
+    } else {
+        holdKey = false;
+        }
+
+    if (keys.bit.JOGLEFT) {
+        setMessage(&JOGLEFT);
+        core->jogLeft(true);
+        core->setReverse(false);
+        this->leftJogToggle = true;
+    } else {
+        if (leftJogToggle == true) {
+            core->jogLeft(false);
+        }
+        leftJogToggle = false;
+    }
+
+    if (keys.bit.JOGRIGHT) {
+        setMessage(&JOGRIGHT);
+        this->reverse = true;
+        core->setReverse(true);
+        core->jogRight(true);
+        this->rightJogToggle = true;
+    } else {
+        if (rightJogToggle == true) {
+            core->jogRight(false);
+        }
+        rightJogToggle = false;
+        core->setReverse(false);//need to fix reverse so it reverts to original state, not just back to false
+        this->reverse = false;
+    }
+
     if( keys.bit.SET ) {
         this->sposition =! this->sposition;
         if ( sposition ) {
@@ -183,6 +278,32 @@ void UserInterface :: loop( void )
 
     if( keys.bit.ZERODRO ) {
         core->zeroCarriagePosition();
+    }
+
+    if (keys.bit.JOGSPEED) {
+        if (core->jog1Active ) {
+            core->setJogSpeed(2);
+        } else if (core->jog2Active) {
+            core->setJogSpeed(3);
+        } else {
+            core->setJogSpeed(1);
+        }
+    }
+
+    if (keys.bit.RIGHTSTOP) {
+        core->setRightStop(!core->rightStopActive);
+
+        if ( core->rightStopActive ) {
+            setMessage(&RIGHT_STOP);
+        }
+    }
+
+    if (keys.bit.LEFTSTOP) {
+        core->setLeftStop(!core->leftStopActive);
+
+        if ( core->leftStopActive ) {
+            setMessage(&LEFT_STOP);
+        }
     }
 
 
@@ -227,6 +348,7 @@ void UserInterface :: loop( void )
 // update the control panel
     controlPanel->setLEDs(calculateLEDs());
     controlPanel->setValue(feedTable->current()->display);
+    controlPanel->setHoldKey(this->holdKey);
 
     if ( sposition ) {
         controlPanel->setSPosition(currentSPosition);
@@ -235,11 +357,6 @@ void UserInterface :: loop( void )
     }
 
     controlPanel->setCarriagePosition(carriagePosition);
-
-    /* if( ! core->isPowerOn() ) disabled this loop as want Power On/Off to only affect Enable pin, not make UI changes
-    {
-        controlPanel->setValue(VALUE_BLANK);
-    }*/
 
     controlPanel->refresh(sposition);
 }

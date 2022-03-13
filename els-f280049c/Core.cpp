@@ -62,7 +62,13 @@ void Core :: setReverse(bool reverse)
 void Core :: setPowerOn(bool powerOn)
 {
     this->powerOn = powerOn;
-    this->stepperDrive->setEnabled(powerOn);
+    this->stepperDrive->setPowerOn(powerOn);
+}
+
+void Core :: setEnabled(bool Enabled)
+{
+    this->Enabled = Enabled;
+    this->stepperDrive->setEnabled(Enabled);
 }
 
 

@@ -115,7 +115,7 @@ Uint16 Encoder :: getRPM(void)
     return rpm;
 }
 
-Uint16 Encoder :: getSPosition(void)
+Uint32 Encoder :: getSPosition(void)
 {
     // Initialise values
     if ( ENCODER_REGS.QEPCTL.bit.SWI == 1 ) {
@@ -124,7 +124,12 @@ Uint16 Encoder :: getSPosition(void)
 }
     sposition = (getCount() % ENCODER_RESOLUTION * 3600) / ENCODER_RESOLUTION;
 
-    return sposition;
+    if (sposition >= 0 ) {
+        return sposition;
+    } else {
+        return sposition + 3600;
+    }
+
 }
 
 int64 Encoder :: getCount(void)
@@ -137,7 +142,7 @@ int64 Encoder :: getCount(void)
         overflowCount += ENCODER_REGS.QPOSMAX;
     }
 
-    previousCount = currentCount + overflowCount + zeroOffset;
+    previousCount = currentCount;
 
     return currentCount + overflowCount + zeroOffset;
 }

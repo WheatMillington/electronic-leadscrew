@@ -46,7 +46,7 @@ class Encoder
 private:
     Uint32 previous;
     Uint16 rpm;
-    Uint32 sposition;
+    int32 sposition;
     int64 currentCount;
     int64 previousCount;
     int64 overflowCount;
@@ -57,7 +57,7 @@ public:
     void initHardware( void );
 
     Uint16 getRPM(void);
-    Uint16 getSPosition(void);
+    Uint32 getSPosition(void);
     Uint32 getPosition(void);
     Uint32 getMaxCount(void);
     int64 getCount(void);

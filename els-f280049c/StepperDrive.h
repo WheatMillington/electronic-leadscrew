@@ -91,6 +91,7 @@ private:
     // Is the drive enabled?
     //
     bool enabled;
+    bool powerOn;
 
 public:
     //
@@ -110,6 +111,7 @@ public:
     bool checkStepBacklog();
 
     void setEnabled(bool);
+    void setPowerOn(bool);
 
     bool isAlarm();
 
@@ -154,6 +156,11 @@ inline void StepperDrive :: setEnabled(bool enabled)
     }
 }
 
+inline void StepperDrive :: setPowerOn(bool powerOn)
+{
+    this->powerOn = powerOn;
+}
+
 inline bool StepperDrive :: isAlarm()
 {
 #ifdef USE_ALARM_PIN
@@ -166,7 +173,7 @@ inline bool StepperDrive :: isAlarm()
 
 inline void StepperDrive :: ISR(void)
 {
-    if(enabled) {
+    if(enabled && powerOn) {
 
         switch( this->state ) {
 

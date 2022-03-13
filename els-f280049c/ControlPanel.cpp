@@ -159,6 +159,7 @@ void ControlPanel :: sendData()
 {
     int i;
     Uint16 ledMask = this->leds.all;
+    Uint16 ledMask_2 = this->leds.all >> 8;
     Uint16 briteVal = 0x80;
     if( this->brightness > 0 ) {
         briteVal = 0x87 + this->brightness;
@@ -223,8 +224,8 @@ void ControlPanel :: sendData()
  //       {
             spiBus->sendWord_2(this->sevenSegmentData_2[i]);
  //       }
-        spiBus->sendWord_2( (ledMask & 0x80) ? 0xff00 : 0x0000 );
-        ledMask <<= 1;
+        spiBus->sendWord_2( (ledMask_2 & 0x80) ? 0xff00 : 0x0000 );
+        ledMask_2 <<= 1;
     }
     CS_RELEASE_2;
     DELAY_US(CS_RISE_TIME_US);              // give CS line time to register high
@@ -365,11 +366,11 @@ KEY_REG ControlPanel :: getKeys()
     configureSpiBus();
 
     newKeys = readKeys();
-    if( isValidKeyState(newKeys) && isStable(newKeys) && newKeys.all != this->keys.all ) {
+    if( isValidKeyState(newKeys) && isStable(newKeys) && ((newKeys.all != this->keys.all) || holdKey ) ) {
         KEY_REG previousKeys = this->keys; // remember the previous stable value
         this->keys = newKeys;
 
-        if( previousKeys.all == 0 ) {     // only act if the previous stable value was no keys pressed
+        if( previousKeys.all == 0 || holdKey) {     // only act if the previous stable value was no keys pressed or it's a holdable key
             return newKeys;
         }
     }
@@ -394,7 +395,7 @@ bool ControlPanel :: isValidKeyState(KEY_REG testKeys) {
     case 1 << 12:
     case 1 << 13:
     case 1 << 14:
-//    case 1 << 15:
+    case 1 << 15:
         return true;
     }
 

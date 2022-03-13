@@ -143,6 +143,10 @@
 // and direction keys are ignored.
 //#define IGNORE_ALL_KEYS_WHEN_RUNNING
 
+// Jog speed as a factor of selected feed rate and spindle speed
+#define JOG_SPEED_1 0.25
+#define JOG_SPEED_2 1
+#define JOG_SPEED_3 3.0
 
 
 

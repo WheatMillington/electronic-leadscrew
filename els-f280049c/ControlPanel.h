@@ -82,8 +82,18 @@
 #define LED_FORWARD (1<<6)
 #define LED_POWER (1<<7)
 
+#define LED_JOG3 (1<<8)
+#define LED_JOG2 (1<<9)
+#define LED_JO1 (1<<10)
+#define LED_JOGGING (1<<11)
+#define LED_FEEDINGRIGHT (1<<12)
+#define LED_FEEDINGLEFT (1<<13)
+#define LED_RSTOP (1<<14)
+#define LED_LSTOP (1<<15)
+
 struct LED_BITS
 {
+    // Display 1, right to left
     Uint16 TPI:1;
     Uint16 INCH:1;
     Uint16 MM:1;
@@ -92,6 +102,16 @@ struct LED_BITS
     Uint16 REVERSE:1;
     Uint16 FORWARD:1;
     Uint16 POWER:1;
+
+    //Display 2, right to left
+    Uint16 JOG3:1;
+    Uint16 JOG2:1;
+    Uint16 JOG1:1;
+    Uint16 JOGGING:1;
+    Uint16 FEEDINGRIGHT:1;
+    Uint16 FEEDINGLEFT:1;
+    Uint16 RSTOP:1;
+    Uint16 LSTOP:1;
 };
 
 typedef union LED_REG
@@ -102,16 +122,6 @@ typedef union LED_REG
 
 struct KEY_BITS
 {
-    // Display 2, right to left
-    Uint16 LEFT_JOG:1;
-    Uint16 RIGHT_JOG:1;
-    Uint16 reserved4:1;
-    Uint16 reserved5:1;
-    Uint16 reserved6:1;
-    Uint16 reserved7:1;
-    Uint16 reserved8:1;
-    Uint16 ZERODRO:1;
-    
     // Display 1, right to left
     Uint16 UP:1;
     Uint16 reserved1:1;
@@ -121,6 +131,16 @@ struct KEY_BITS
     Uint16 FWD_REV:1;
     Uint16 SET:1;
     Uint16 POWER:1;
+
+    // Display 2, right to left
+    Uint16 JOGSPEED:1;
+    Uint16 JOGRIGHT:1;
+    Uint16 JOGLEFT:1;
+    Uint16 FEEDRIGHT:1;
+    Uint16 FEEDLEFT:1;
+    Uint16 RIGHTSTOP:1;
+    Uint16 LEFTSTOP:1;
+    Uint16 ZERODRO:1;
 };
 
 typedef union KEY_REG
@@ -187,6 +207,7 @@ private:
     void configureSpiBus(void);
     bool isValidKeyState(KEY_REG);
     bool isStable(KEY_REG);
+    bool holdKey;
 
 public:
     ControlPanel(SPIBus *spiBus);
@@ -220,6 +241,10 @@ public:
 
     // refresh the hardware display
     void refresh(bool showposition);
+
+    void setHoldKey(bool);
+
+
 };
 
 
@@ -246,6 +271,11 @@ inline void ControlPanel :: setValue(const Uint16 *value)
 inline void ControlPanel :: setLEDs(LED_REG leds)
 {
     this->leds = leds;
+}
+
+inline void ControlPanel :: setHoldKey (bool holdKey)
+{
+    this->holdKey = holdKey;
 }
 
 

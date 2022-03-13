@@ -65,7 +65,7 @@ void StepperDrive :: initHardware(void)
     GPIO_CLEAR_DIRECTION;
     EDIS;
 
-    setEnabled(false); // start off with power off
+    setEnabled(true); // start off with power off
 }
 
 int32 StepperDrive :: getStepperPosition()
