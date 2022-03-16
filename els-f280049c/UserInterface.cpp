@@ -42,13 +42,13 @@ const MESSAGE STARTUP_MESSAGE_1 =
 const MESSAGE SETTINGS_MESSAGE_RPM =
 {
  .message = { BLANK, BLANK, LETTER_R, LETTER_P, LETTER_M, BLANK, BLANK, BLANK },
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
 
 const MESSAGE SETTINGS_MESSAGE_POSITION =
 {
  .message = { LETTER_P, LETTER_O, LETTER_S, LETTER_I, LETTER_T, LETTER_I, LETTER_O, LETTER_N},
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
 
 extern const MESSAGE BACKLOG_PANIC_MESSAGE_2;
@@ -65,43 +65,31 @@ const MESSAGE BACKLOG_PANIC_MESSAGE_2 =
  .next = &BACKLOG_PANIC_MESSAGE_1
 };
 
-const MESSAGE JOGRIGHT =
-{
- .message = { LETTER_J, LETTER_O, LETTER_G, BLANK, LETTER_R, BLANK, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
-};
-
-const MESSAGE JOGLEFT =
-{
- .message = { LETTER_J, LETTER_O, LETTER_G, BLANK, LETTER_L, BLANK, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
 };
 
 const MESSAGE FEEDRIGHT =
 {
  .message = { LETTER_F, LETTER_E, LETTER_E, LETTER_D, BLANK, LETTER_R, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
 
 const MESSAGE FEEDLEFT =
 {
  .message = { LETTER_F, LETTER_E, LETTER_E, LETTER_D, BLANK, LETTER_L, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
 
 const MESSAGE RIGHT_STOP =
 {
  .message = { LETTER_R, BLANK, LETTER_S, LETTER_T, LETTER_O, LETTER_P, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
 
 const MESSAGE LEFT_STOP =
 {
  .message = { LETTER_L, BLANK, LETTER_S, LETTER_T, LETTER_O, LETTER_P, BLANK, BLANK},
- .displayTime = UI_REFRESH_RATE_HZ * .5
+ .displayTime = UI_REFRESH_RATE_HZ * .25
 };
-
-//const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
 
 UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory)
 {
@@ -114,7 +102,7 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     this->reverse = false; // start out going forward
     this->sposition = false; // start out showing RPM
     core->setPowerOn(false); // start out with power off
-    core->setEnabled(true);
+    core->setEnabled(true);  // keep motor enabled to eliminate start-up lag
 
     this->feedTable = NULL;
 
@@ -123,8 +111,8 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     // initialize the core so we start up correctly
     core->setReverse(this->reverse);
     core->setFeed(loadFeedTable());
-    this->setJogSpeed(2);
-    core->setJogFactor(1);
+    this->setJogSpeed(2);  // select the jog speed LED
+    core->setJogFactor(1);  // set the jog factor to 1, being the standard (non-jog) number
 
     setMessage(&STARTUP_MESSAGE_1);
 }
@@ -147,12 +135,7 @@ LED_REG UserInterface::calculateLEDs()
         leds.bit.REVERSE = this->reverse;
         leds.bit.FORWARD = ! this->reverse;
     }
-    else
-    {
-        // power is off
-        // leds.all = 0;
-    }
-
+  
     leds.bit.LSTOP = core->leftStopActive;
     leds.bit.RSTOP = core->rightStopActive;
     leds.bit.FEEDINGLEFT = core->feedingLeft;
@@ -161,7 +144,6 @@ LED_REG UserInterface::calculateLEDs()
     leds.bit.JOG1 = jog1Active;
     leds.bit.JOG2 = jog2Active;
     leds.bit.JOG3 = jog3Active;
-
 
     return leds;
 }
@@ -227,7 +209,6 @@ void UserInterface :: setJogSpeed(Uint16 jogSpeed)
     }
 }
 
-
 void UserInterface :: loop( void )
 {
     // read the RPM up front so we can use it to make decisions
@@ -249,50 +230,82 @@ void UserInterface :: loop( void )
 
     // Only respond when power is OFF
     if( !core->isPowerOn() ) {
-        if (keys.bit.FEEDRIGHT) {
-            setMessage(&FEEDRIGHT);
-            core->setJogFactor(-1);
-            core->feedRight();
+      
+      // Feeding - ie feed until L/R stops are reached
+      if (keys.bit.FEEDLEFT) {
+        setMessage(&FEEDLEFT);
+        core->feedLeft();
         }
-
-        if (keys.bit.FEEDLEFT) {
-            setMessage(&FEEDLEFT);
-            core->feedLeft();
+      
+      if (keys.bit.FEEDRIGHT) {
+        setMessage(&FEEDRIGHT);
+        core->setJogFactor(-1);
+        core->feedRight();
         }
-    }
-
-    // respond regardless of machine state
-    if(keys.bit.JOGLEFT || keys.bit.JOGRIGHT) {
+      
+      // Jogging - jog while key is held
+      if(keys.bit.JOGLEFT || keys.bit.JOGRIGHT) {
         holdKey = true;
-    } else {
+        } else {
         holdKey = false;
         }
 
-    if (keys.bit.JOGLEFT) {
+      if (keys.bit.JOGLEFT) {
         core->setPowerOn(true);
         core->setJogFactor(this->jogFactor);
         this->leftJogToggle = true;
-    } else {
+      } else {
         if (leftJogToggle == true) {
             core->setJogFactor(1);
             leftJogToggle = false;
             core->setPowerOn(false);
+          }
         }
-    }
 
-    if (keys.bit.JOGRIGHT) {
-        core->setPowerOn(true);
-        core->setJogFactor(-this->jogFactor);
-        this->rightJogToggle = true;
-    } else {
-        if (rightJogToggle == true) {
+        if (keys.bit.JOGRIGHT) {
+          core->setPowerOn(true);
+          core->setJogFactor(-this->jogFactor);
+          this->rightJogToggle = true;
+        } else {
+          if (rightJogToggle == true) {
             core->setJogFactor(1);
             rightJogToggle = false;
             core->setPowerOn(false);
-        }
+            }
+          }
+      
+          if (keys.bit.JOGSPEED) {
+            if (jog1Active ) {
+              setJogSpeed(2);
+            } else if (jog2Active) {
+              setJogSpeed(3);
+            } else {
+              setJogSpeed(1);
+            }
+          }
     }
 
-    if( keys.bit.SET ) {
+    // respond regardless of machine state
+  
+    if( keys.bit.POWER )
+    {
+      if ( !core->isPowerOn() ) {
+        this->core->setEnabled(true);  // If turning power on with the key, enable (ie reset) stepper - resets panic stop
+      }
+      this->core->setPowerOn(!this->core->isPowerOn());
+    }
+
+    if( keys.bit.UP )
+    {
+        core->setFeed(feedTable->next());
+    }
+  
+    if( keys.bit.DOWN )
+    {
+        core->setFeed(feedTable->previous());
+    }
+  
+    if( keys.bit.SET ) {  // Switch between showing RPM and Spindle Position
         this->sposition =! this->sposition;
         if ( sposition ) {
             setMessage(&SETTINGS_MESSAGE_POSITION);
@@ -305,19 +318,8 @@ void UserInterface :: loop( void )
         core->zeroCarriagePosition();
     }
 
-    if (keys.bit.JOGSPEED) {
-        if (jog1Active ) {
-            setJogSpeed(2);
-        } else if (jog2Active) {
-            setJogSpeed(3);
-        } else {
-            setJogSpeed(1);
-        }
-    }
-
     if (keys.bit.RIGHTSTOP) {
         core->setRightStop(!core->rightStopActive);
-
         if ( core->rightStopActive ) {
             setMessage(&RIGHT_STOP);
         }
@@ -325,12 +327,10 @@ void UserInterface :: loop( void )
 
     if (keys.bit.LEFTSTOP) {
         core->setLeftStop(!core->leftStopActive);
-
         if ( core->leftStopActive ) {
             setMessage(&LEFT_STOP);
         }
     }
-
 
     if( currentRpm == 0 )
     {
@@ -352,23 +352,6 @@ void UserInterface :: loop( void )
         }
 
     }
-
-// these keys can be operated when the machine is running
-    if( keys.bit.POWER )
-    {
-      this->core->setPowerOn(!this->core->isPowerOn());
-    }
-
-    if( keys.bit.UP )
-    {
-        core->setFeed(feedTable->next());
-    }
-  
-    if( keys.bit.DOWN )
-    {
-        core->setFeed(feedTable->previous());
-    }
-  
 
 // update the control panel
     controlPanel->setLEDs(calculateLEDs());
