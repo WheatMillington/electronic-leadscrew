@@ -134,7 +134,6 @@ inline void StepperDrive :: setCurrentPosition(int32 position)
     this->currentPosition = position;
 }
 
-
 inline bool StepperDrive :: checkStepBacklog()
 {
     if( abs(this->desiredPosition - this->currentPosition) > MAX_BUFFERED_STEPS ) {

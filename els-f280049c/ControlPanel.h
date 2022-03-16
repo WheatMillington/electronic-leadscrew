@@ -133,6 +133,7 @@ struct KEY_BITS
     Uint16 POWER:1;
 
     // Display 2, right to left
+    Uint16 ZERODRO:1;
     Uint16 JOGSPEED:1;
     Uint16 JOGRIGHT:1;
     Uint16 JOGLEFT:1;
@@ -140,12 +141,11 @@ struct KEY_BITS
     Uint16 FEEDLEFT:1;
     Uint16 RIGHTSTOP:1;
     Uint16 LEFTSTOP:1;
-    Uint16 ZERODRO:1;
 };
 
 typedef union KEY_REG
 {
-    Uint16 all;
+    int16 all;
     struct KEY_BITS bit;
 } KEY_REG;
 

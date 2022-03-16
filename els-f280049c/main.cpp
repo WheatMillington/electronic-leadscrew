@@ -88,7 +88,7 @@ void main(void)
 
     // Initialize System Control:
     // PLL, WatchDog, enable Peripheral Clocks
-    InitSysCtrl();
+         InitSysCtrl();
 
     // Disable CPU interrupts
     DINT;

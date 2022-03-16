@@ -46,8 +46,8 @@ private:
     int32 leftStop;
     int32 rightStop;
 
-    int16 jogSpeed;
     float jogFactor;
+    float previousJogFactor;
 
 #ifdef USE_FLOATING_POINT
     float feed;
@@ -96,17 +96,8 @@ public:
     bool feedingLeft;
     bool feedingRight;
 
-    bool jog1Active;
-    bool jog2Active;
-    bool jog3Active;
+    void setJogFactor(float jogFactor);
 
-    bool joggingLeft;
-    bool joggingRight;
-
-    void jogLeft(bool);
-    void jogRight(bool);
-
-    void setJogSpeed(int16);
 };
 
 inline void Core :: setFeed(const FEED_THREAD *feed)
@@ -132,7 +123,7 @@ inline int32 Core :: getCarriagePosition(const FEED_THREAD *feed)
 {
     if ( isPowerOn() ) {
         carriageCurrentCount = encoder->getCount();
-        incrementCount = (carriageCurrentCount - carriagePreviousCount) * feedDirection;
+        incrementCount = (carriageCurrentCount - carriagePreviousCount) * feedDirection * jogFactor;
         int32 feedrate = (float)feed->numerator / (float)STEPPER_RESOLUTION;
         carriagePosition += (incrementCount * feedrate * 10000) / ENCODER_RESOLUTION;
         carriagePreviousCount = carriageCurrentCount;
@@ -182,40 +173,11 @@ inline void Core :: zeroCarriagePosition(void)
     encoder->zeroCount();
 }
 
-inline void Core :: setJogSpeed(int16 jogSpeed)
+inline void Core :: setJogFactor ( float jogFactor )
 {
-    this->jogSpeed = jogSpeed;
-    if ( this->jogSpeed == 1 ) {
-        jogFactor = JOG_SPEED_1;
-        jog1Active = true;
-        jog2Active = false;
-        jog3Active = false;
-    } else {
-        if ( this->jogSpeed == 2 ) {
-            jogFactor = JOG_SPEED_2;
-            jog1Active = false;
-            jog2Active = true;
-            jog3Active = false;
-        } else {
-            jogFactor = JOG_SPEED_3;
-            jog1Active = false;
-            jog2Active = false;
-            jog3Active = true;
-        }
-    }
+    this->jogFactor = jogFactor;
 }
 
-inline void Core :: jogLeft(bool joggingLeft)
-{
-    this->joggingLeft = joggingLeft;
-    setPowerOn(joggingLeft);
-}
-
-inline void Core :: jogRight(bool joggingRight)
-{
-    this->joggingRight = joggingRight;
-    setPowerOn(joggingRight);
-}
 
 inline bool Core :: isAlarm()
 {
@@ -230,11 +192,7 @@ inline bool Core :: isPowerOn()
 inline int32 Core :: feedRatio(Uint32 count)
 {
 #ifdef USE_FLOATING_POINT
-    if (joggingLeft || joggingRight) {
         return ((float)count) * this->feed * feedDirection * jogFactor;
-    } else {
-        return ((float)count) * this->feed * feedDirection;
-    }
 #else // USE_FLOATING_POINT
     return ((long long)count) * feed->numerator / feed->denominator * feedDirection;
 #endif // USE_FLOATING_POINT
@@ -247,6 +205,7 @@ inline void Core :: ISR( void )
             setPowerOn(false);
             feedingLeft = false;
             feedingRight = false;
+            setJogFactor(1);
         }
 
         // read the encoder
@@ -265,7 +224,7 @@ inline void Core :: ISR( void )
         }
 
         // if the feed or direction changed, reset sync to avoid a big step
-        if( feed != previousFeed || feedDirection != previousFeedDirection) {
+        if( feed != previousFeed || feedDirection != previousFeedDirection || jogFactor != previousJogFactor) {
             stepperDrive->setCurrentPosition(desiredSteps);
         }
 
@@ -273,6 +232,7 @@ inline void Core :: ISR( void )
         previousSpindlePosition = spindlePosition;
         previousFeedDirection = feedDirection;
         previousFeed = feed;
+        previousJogFactor = jogFactor;
 
         // service the stepper drive state machine
         stepperDrive->ISR();

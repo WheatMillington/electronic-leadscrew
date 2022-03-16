@@ -66,7 +66,14 @@ private:
 
     bool leftJogToggle;
     bool rightJogToggle;
-    bool reverseState;
+    Uint16 jogSpeed;
+
+    float jogFactor;
+    bool jog1Active;
+    bool jog2Active;
+    bool jog3Active;
+
+    void setJogSpeed(Uint16 jogSpeed);
 
 public:
     UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory);

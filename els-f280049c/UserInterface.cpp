@@ -123,7 +123,8 @@ UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTable
     // initialize the core so we start up correctly
     core->setReverse(this->reverse);
     core->setFeed(loadFeedTable());
-    core->setJogSpeed(1);
+    this->setJogSpeed(2);
+    core->setJogFactor(1);
 
     setMessage(&STARTUP_MESSAGE_1);
 }
@@ -156,10 +157,10 @@ LED_REG UserInterface::calculateLEDs()
     leds.bit.RSTOP = core->rightStopActive;
     leds.bit.FEEDINGLEFT = core->feedingLeft;
     leds.bit.FEEDINGRIGHT = core->feedingRight;
-    leds.bit.JOGGING = core->joggingLeft || core->joggingRight;
-    leds.bit.JOG1 = core->jog1Active;
-    leds.bit.JOG2 = core->jog2Active;
-    leds.bit.JOG3 = core->jog3Active;
+    leds.bit.JOGGING = leftJogToggle || rightJogToggle;
+    leds.bit.JOG1 = jog1Active;
+    leds.bit.JOG2 = jog2Active;
+    leds.bit.JOG3 = jog3Active;
 
 
     return leds;
@@ -201,6 +202,32 @@ void UserInterface :: panicStepBacklog( void )
     setMessage(&BACKLOG_PANIC_MESSAGE_1);
 }
 
+void UserInterface :: setJogSpeed(Uint16 jogSpeed)
+{
+    this->jogSpeed = jogSpeed;
+    jog1Active = false;
+    jog2Active = false;
+    jog3Active = false;
+
+    switch ( this->jogSpeed) {
+        case 1:
+            this->jog1Active = true;
+            jogFactor = JOG_SPEED_1;
+        break;
+
+        case 2:
+            this->jog2Active = true;
+            jogFactor = JOG_SPEED_2;
+        break;
+
+        case 3:
+            this->jog3Active = true;
+            jogFactor = JOG_SPEED_3;
+        break;
+    }
+}
+
+
 void UserInterface :: loop( void )
 {
     // read the RPM up front so we can use it to make decisions
@@ -224,6 +251,7 @@ void UserInterface :: loop( void )
     if( !core->isPowerOn() ) {
         if (keys.bit.FEEDRIGHT) {
             setMessage(&FEEDRIGHT);
+            core->setJogFactor(-1);
             core->feedRight();
         }
 
@@ -241,30 +269,27 @@ void UserInterface :: loop( void )
         }
 
     if (keys.bit.JOGLEFT) {
-        setMessage(&JOGLEFT);
-        core->jogLeft(true);
-        core->setReverse(false);
+        core->setPowerOn(true);
+        core->setJogFactor(this->jogFactor);
         this->leftJogToggle = true;
     } else {
         if (leftJogToggle == true) {
-            core->jogLeft(false);
+            core->setJogFactor(1);
+            leftJogToggle = false;
+            core->setPowerOn(false);
         }
-        leftJogToggle = false;
     }
 
     if (keys.bit.JOGRIGHT) {
-        setMessage(&JOGRIGHT);
-        this->reverse = true;
-        core->setReverse(true);
-        core->jogRight(true);
+        core->setPowerOn(true);
+        core->setJogFactor(-this->jogFactor);
         this->rightJogToggle = true;
     } else {
         if (rightJogToggle == true) {
-            core->jogRight(false);
+            core->setJogFactor(1);
+            rightJogToggle = false;
+            core->setPowerOn(false);
         }
-        rightJogToggle = false;
-        core->setReverse(false);//need to fix reverse so it reverts to original state, not just back to false
-        this->reverse = false;
     }
 
     if( keys.bit.SET ) {
@@ -281,12 +306,12 @@ void UserInterface :: loop( void )
     }
 
     if (keys.bit.JOGSPEED) {
-        if (core->jog1Active ) {
-            core->setJogSpeed(2);
-        } else if (core->jog2Active) {
-            core->setJogSpeed(3);
+        if (jog1Active ) {
+            setJogSpeed(2);
+        } else if (jog2Active) {
+            setJogSpeed(3);
         } else {
-            core->setJogSpeed(1);
+            setJogSpeed(1);
         }
     }
 
