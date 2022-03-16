@@ -138,6 +138,7 @@ inline bool StepperDrive :: checkStepBacklog()
 {
     if( abs(this->desiredPosition - this->currentPosition) > MAX_BUFFERED_STEPS ) {
         setEnabled(false);
+        this->setCurrentPosition(this->desiredPosition); // realign so that stepper can be re-enabled
         return true;
     }
     return false;
