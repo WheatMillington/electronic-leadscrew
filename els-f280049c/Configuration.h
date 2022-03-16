@@ -161,9 +161,7 @@
 // output steps faster than this, it will get behind and will stop automatically
 // when the buffered step count exceeds this value.
 #define MAX_BUFFERED_STEPS 100
-#define MAX_SINGLE_STEP 45  // largest single step count, this is essentially an error-catcher for changes in jog speed
-// calculated as the steps that would result in >10deg change in position
-// distinct from buffered steps because it is assessed at every cycle of the ISR
+
 
 
 //================================================================================
